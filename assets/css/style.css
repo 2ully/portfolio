@@ -216,6 +216,7 @@ body::before {
   min-height: 100vh;
   display: flex;
   align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
   padding: var(--nav-height) 2rem 0;
@@ -1287,6 +1288,22 @@ footer {
 }
 
 @media (max-width: 768px) {
+  #hero {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .hero-container {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero-content {
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
   .nav-links {
     display: none;
   }
