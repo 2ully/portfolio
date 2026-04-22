@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── CONTACT FORM ─────────────────────────
   const form = document.getElementById('contact-form');
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const btn = form.querySelector('.form-submit');
@@ -89,13 +89,31 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.innerHTML = '<span style="display:inline-block;animation:spin 0.6s linear infinite">↻</span> Sending...';
     btn.disabled = true;
 
-    // Simulate sending (replace with real logic)
-    setTimeout(() => {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/contact", {
+        method: "POST",
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (response.ok) {
+        showToast('✅', "Message sent! I'll get back to you soon.");
+        form.reset();
+      } else {
+        showToast('❌', 'Failed to send message. Please try again.');
+      }
+    } catch (error) {
+      showToast('❌', 'An error occurred. Please try again later.');
+    } finally {
       btn.innerHTML = originalText;
       btn.disabled = false;
-      form.reset();
-      showToast('✅', 'Message sent! I\'ll get back to you soon.');
-    }, 1800);
+    }
   });
 
   function showToast(icon, message) {
