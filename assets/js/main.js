@@ -12,14 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── MOBILE NAV TOGGLE ────────────────────
   const navToggle = document.getElementById('nav-toggle');
-  const navLinks  = document.getElementById('nav-links');
+  const navLinks = document.getElementById('nav-links');
 
   navToggle?.addEventListener('click', () => {
     navLinks.classList.toggle('open');
     const spans = navToggle.querySelectorAll('span');
     if (navLinks.classList.contains('open')) {
       spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-      spans[1].style.opacity   = '0';
+      spans[1].style.opacity = '0';
       spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
     } else {
       spans.forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
@@ -61,10 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
   counters.forEach(el => counterObserver.observe(el));
 
   function animateCounter(el) {
-    const target   = parseInt(el.dataset.target);
-    const suffix   = el.dataset.suffix || '';
+    const target = parseInt(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
     const duration = 1800;
-    const step     = 16;
+    const step = 16;
     const increment = target / (duration / step);
     let current = 0;
 
@@ -79,6 +79,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }, step);
   }
 
+  // ─── EMAILJS SETUP ────────────────────────
+  const SERVICE_ID = "service_portfolio";
+  const TEMPLATE_ID = "template_hrzs8sr";
+  const PUBLIC_KEY = "-vBLqwXMnsR2mnJSz";
+
+  emailjs.init(PUBLIC_KEY);
+
   // ─── CONTACT FORM ─────────────────────────
   const form = document.getElementById('contact-form');
   form?.addEventListener('submit', async (e) => {
@@ -89,33 +96,20 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.innerHTML = '<span style="display:inline-block;animation:spin 0.6s linear infinite">↻</span> Sending...';
     btn.disabled = true;
 
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-
     try {
-      const response = await fetch("http://127.0.0.1:8000/contact", {
-        method: "POST",
-        headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-      
-      if (response.ok) {
-        showToast('✅', "Message sent! I'll get back to you soon.");
-        form.reset();
-      } else {
-        showToast('❌', 'Failed to send message. Please try again.');
-      }
+      await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form);
+      showToast('✅', "Message sent! I'll get back to you soon.");
+      form.reset();
     } catch (error) {
-      showToast('❌', 'An error occurred. Please try again later.');
+      showToast('❌', 'Failed to send message. Please try again.');
+      console.error('EmailJS error:', error);
     } finally {
       btn.innerHTML = originalText;
       btn.disabled = false;
     }
   });
 
+  // ─── TOAST ────────────────────────────────
   function showToast(icon, message) {
     const toast = document.getElementById('toast');
     if (!toast) return;
@@ -124,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 4000);
   }
-
   // ─── SMOOTH ACTIVE NAV HIGHLIGHT ──────────
   const sections = document.querySelectorAll('section[id]');
   const navAnchorMap = {};
