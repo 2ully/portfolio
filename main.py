@@ -4,13 +4,17 @@ from pydantic import BaseModel, EmailStr
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = FastAPI(title="Portfolio API")
 
 # Enable CORS (Important because frontend and backend will run on different ports locally)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this to your specific frontend URL in production
+    allow_origins=["https://2ully.github.io"],  # Adjust this to your specific frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,36 +38,37 @@ async def submit_contact_form(form: ContactForm):
         # --- EMAIL SENDING LOGIC (SETUP REQUIRED) ---
         # To make this actually send an email to yourself, you need an SMTP server. 
         # For Gmail, you should use an "App Password".
+
+
+        SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+        SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
+        RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
         
-         SENDER_EMAIL = "applesniper1@gmail.com"
-         SENDER_PASSWORD = "bdzx adtp hvfd iiio" 
-         RECEIVER_EMAIL = "suod1444@gmail.com"
+        msg = MIMEMultipart()
+        msg['From'] = SENDER_EMAIL
+        msg['To'] = RECEIVER_EMAIL
+        msg['Subject'] = f"New Portfolio Inquiry from {form.name} - {form.service}"
+            
+        email_body = f"Name: {form.name}\nEmail: {form.email}\nService: {form.service}\n\nMessage:\n{form.message}"
+        msg.attach(MIMEText(email_body, 'plain'))
         
-         msg = MIMEMultipart()
-         msg['From'] = SENDER_EMAIL
-         msg['To'] = RECEIVER_EMAIL
-         msg['Subject'] = f"New Portfolio Inquiry from {form.name} - {form.service}"
-        
-         email_body = f"Name: {form.name}\nEmail: {form.email}\nService: {form.service}\n\nMessage:\n{form.message}"
-         msg.attach(MIMEText(email_body, 'plain'))
-        
-         server = smtplib.SMTP('smtp.gmail.com', 587)
-         server.starttls()
-         server.login(SENDER_EMAIL, SENDER_PASSWORD)
-         server.send_message(msg)
-         server.quit()
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.send_message(msg)
+        server.quit()
         
         # --------------------------------------------
 
-         print("-" * 40)
-         print("📨 NEW CONTACT FORM SUBMISSION")
-         print(f"Name:    {form.name}")
-         print(f"Email:   {form.email}")
-         print(f"Service: {form.service}")
-         print(f"Message:\n{form.message}")
-         print("-" * 40)
+        print("-" * 40)
+        print("📨 NEW CONTACT FORM SUBMISSION")
+        print(f"Name:    {form.name}")
+        print(f"Email:   {form.email}")
+        print(f"Service: {form.service}")
+        print(f"Message:\n{form.message}")
+        print("-" * 40)
 
-         return {"status": "success", "message": "Your message was sent successfully."}
+        return {"status": "success", "message": "Your message was sent successfully."}
 
     except Exception as e:
         print(f"❌ Error handling submission: {e}")
